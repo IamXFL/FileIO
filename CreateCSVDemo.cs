@@ -18,7 +18,7 @@ class Program
         MSWord.Application wordApp; // word 应用程序变量
         MSWord.Document wordDoc;    // word 文档变量
 
-        path = @"F:\xianfeng\MyWord.docx";
+        path = @"F:\xianfeng\MyWord.csv";       //后缀改为docx 则创建word 文档
         wordApp = new MSWord.ApplicationClass();
 
         if (File.Exists((string)path))
