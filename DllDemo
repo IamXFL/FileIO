@@ -1,0 +1,78 @@
+using System;
+using System.Runtime.InteropServices;
+
+
+namespace DLLDemo
+{
+
+    struct hld3_result
+    {
+        long FrameNo;                          // Stores the measurement frame number.(0 to 999)
+        long EncoderCount;                     // Unused       
+        static long[] value = new long[501];   // Stores the measurement result.
+
+    };
+
+    unsafe class Program
+    {
+
+
+        hld3_result HLD3_RESULT;
+        /* Opens the device (handle acquisition) using the index acquired.           */
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_OpenByIndex", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD3_OpenByIndex(ulong dwIndex, IntPtr * hldHandle);
+
+        /* turn on the sensor head laser.                 */
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_LaserOn", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD3_LaserOn(IntPtr hldHandle, ulong dwHead);
+
+        /* Inputs external synchronization signal (trigger signal).          */
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_InputTrigger", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD3_InputTrigger(IntPtr hldHandle);
+
+        // set the continuous measurement mode status
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_FreeRunModeSet", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD_FreeRunModeSet(IntPtr hldHandle, ulong mode);
+
+        //acquires the number of X direction data of 1 measurement data (waveform).
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_GetMeasureDataNum", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD3_GetMeasureDataNum(IntPtr hldHandle, ulong* dwCount1, ulong* dwCount2);
+
+
+        /* Acquires the measurement result buffered. (Acquisition of shape waveform data) */
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_GetFreeRunResultD", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD3_GetFreeRunResultD(IntPtr hldHandle, ulong dwHead, hld3_result* pHeadResult, ulong dwReqPos, ulong dwReqNum);
+
+        /* Acquires the measurement result (shape waveform data) in parallel during buffering measurement. */
+        [DllImport(@"C:\Users\Administrator\source\repos\DllTest\DllTest\bin\Debug\HLD3.dll", EntryPoint = "HLD3_GetFreeRunResultBUFD", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = false, CallingConvention = CallingConvention.StdCall)]
+        private static extern int HLD3_GetFreeRunResultBUFD(IntPtr hldHandle, ulong dwHead, hld3_result* pHeadResult, ulong dwReqNum);
+
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("begin to test..");
+
+            IntPtr g_htoken = new IntPtr(0);
+            ulong dwHead = 0;
+            hld3_result hr = new hld3_result();
+
+
+
+            hld3_result* pHeadResult = &hr;
+            ulong dwReqPos = 10;
+            ulong dwReqNum = 100;
+            try
+            {
+                 HLD3_GetFreeRunResultD(g_htoken, dwHead, pHeadResult, dwReqPos, dwReqNum);
+                Console.WriteLine("successful.");
+            }
+            catch (Exception e)
+            {
+                Console.Write("failed.");
+            }
+
+
+            Console.ReadKey();
+        }
+    }
+}
